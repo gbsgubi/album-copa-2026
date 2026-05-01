@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0e2813"/>
+      <stop offset="55%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#0e2813"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" ry="96" fill="url(#g)"/>
+  <circle cx="256" cy="248" r="156" fill="#f5f5f5" stroke="#05100a" stroke-width="10"/>
+  <g fill="#05100a">
+    <polygon points="256,180 294,206 280,250 232,250 218,206"/>
+    <polygon points="170,212 212,196 224,234 192,266 160,244"/>
+    <polygon points="342,212 352,244 320,266 288,234 300,196"/>
+    <polygon points="208,294 240,278 272,278 304,294 288,332 224,332"/>
+  </g>
+  <text x="256" y="470" text-anchor="middle" font-family="Arial Black, Arial, sans-serif"
+        font-size="58" font-weight="900" fill="#f59e0b" letter-spacing="3">COPA 2026</text>
+</svg>
