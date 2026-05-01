@@ -1,20 +1,40 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { C } from "./theme.js";
 import { useStickers } from "./hooks/useStickers.js";
 import Home from "./screens/Home.jsx";
 import Album from "./screens/Album.jsx";
 import Especiais from "./screens/Abertura.jsx";
 import Trocas from "./screens/Trocas.jsx";
+import Busca from "./screens/Busca.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 
 export default function App() {
-  const { stickers, toggle, loaded } = useStickers();
+  const { stickers, toggle, loaded, exportData, importData } = useStickers();
   const [screen, setScreen] = useState("home");
   const [albumGroup, setAlbumGroup] = useState("A");
+  const [importMsg, setImportMsg] = useState("");
+  const fileInputRef = useRef(null);
 
   const navTo = (s, group) => {
     setScreen(s);
     if (group) setAlbumGroup(group);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    try {
+      await importData(file);
+      setImportMsg("Backup importado!");
+    } catch {
+      setImportMsg("Arquivo inválido.");
+    }
+    setTimeout(() => setImportMsg(""), 3000);
   };
 
   if (!loaded) {
@@ -49,6 +69,14 @@ export default function App() {
         margin: "0 auto",
       }}
     >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+
       <div
         style={{
           background: C.surface,
@@ -63,7 +91,7 @@ export default function App() {
         }}
       >
         <span style={{ fontSize: 24 }}>⚽</span>
-        <div>
+        <div style={{ flex: 1 }}>
           <div
             style={{
               fontFamily: "'Bebas Neue',cursive",
@@ -88,8 +116,31 @@ export default function App() {
         </div>
       </div>
 
+      {importMsg && (
+        <div
+          style={{
+            background: importMsg.includes("!") ? C.have : C.dup,
+            color: importMsg.includes("!") ? C.haveText : C.dupText,
+            textAlign: "center",
+            padding: "8px 16px",
+            fontSize: 13,
+            fontWeight: 700,
+            borderBottom: `1px solid ${importMsg.includes("!") ? C.haveBorder : C.dupBorder}`,
+          }}
+        >
+          {importMsg}
+        </div>
+      )}
+
       <div style={{ flex: 1, overflowY: "auto", paddingTop: 14 }}>
-        {screen === "home" && <Home stickers={stickers} onNav={navTo} />}
+        {screen === "home" && (
+          <Home
+            stickers={stickers}
+            onNav={navTo}
+            onExport={exportData}
+            onImport={handleImportClick}
+          />
+        )}
         {screen === "album" && (
           <Album stickers={stickers} onToggle={toggle} initGroup={albumGroup} />
         )}
@@ -97,6 +148,7 @@ export default function App() {
           <Especiais stickers={stickers} onToggle={toggle} />
         )}
         {screen === "trocas" && <Trocas stickers={stickers} />}
+        {screen === "busca" && <Busca stickers={stickers} onToggle={toggle} />}
       </div>
 
       <BottomNav screen={screen} onChange={setScreen} />

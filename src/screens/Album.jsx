@@ -19,7 +19,7 @@ export default function Album({ stickers, onToggle, initGroup }) {
       t.stickers.forEach((s) => {
         const v = stickers[s.id] || 0;
         if (v >= 1) have++;
-        if (v === 2) dup++;
+        if (v >= 2) dup += v - 1;
       });
       return { have, dup, pct: Math.round((have / 20) * 100), full: have === 20 };
     },

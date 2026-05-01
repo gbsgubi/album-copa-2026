@@ -346,4 +346,5 @@ export const NAV = [
   { id: "album",     icon: "📋", label: "Álbum"     },
   { id: "especiais", icon: "⭐", label: "Especiais"  },
   { id: "trocas",    icon: "🔄", label: "Trocas"    },
+  { id: "busca",     icon: "🔍", label: "Busca"     },
 ];

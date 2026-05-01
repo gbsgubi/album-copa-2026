@@ -41,7 +41,7 @@ function StatPill({ val, label, color }) {
   );
 }
 
-export default function Home({ stickers, onNav }) {
+export default function Home({ stickers, onNav, onExport, onImport }) {
   const groupStats = useMemo(
     () =>
       GROUPS.map((g) => {
@@ -61,7 +61,7 @@ export default function Home({ stickers, onNav }) {
   }, [stickers]);
 
   const dups = useMemo(
-    () => Object.values(stickers).filter((v) => v === 2).length,
+    () => Object.values(stickers).reduce((sum, v) => sum + (v >= 2 ? v - 1 : 0), 0),
     [stickers]
   );
 
@@ -214,11 +214,74 @@ export default function Home({ stickers, onNav }) {
         <div style={{ display: "flex", gap: 20, fontSize: 13, flexWrap: "wrap" }}>
           <span style={{ color: C.missText }}>— Falta</span>
           <span style={{ color: C.haveText }}>✓ Tenho</span>
-          <span style={{ color: C.dupText }}>↺ Repetida</span>
+          <span style={{ color: C.dupText }}>↺ Repetida (toque p/ contar)</span>
         </div>
         <p style={{ fontSize: 11, color: C.textMuted, margin: "8px 0 0" }}>
           Toque nas figurinhas para alternar o estado.
         </p>
+      </div>
+
+      {/* Dados */}
+      <div
+        style={{
+          marginTop: 16,
+          background: C.surface,
+          borderRadius: 12,
+          padding: "12px 16px",
+          border: `1px solid ${C.border}`,
+        }}
+      >
+        <p
+          style={{
+            fontSize: 11,
+            color: C.textMuted,
+            margin: "0 0 10px",
+            textTransform: "uppercase",
+            letterSpacing: 1,
+          }}
+        >
+          Dados
+        </p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={onExport}
+            style={{
+              flex: 1,
+              background: C.bg,
+              border: `1px solid ${C.border}`,
+              borderRadius: 10,
+              padding: "10px 8px",
+              color: C.textSec,
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Barlow Condensed',sans-serif",
+              cursor: "pointer",
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            ⬇️ Exportar backup
+          </button>
+          <button
+            onClick={onImport}
+            style={{
+              flex: 1,
+              background: C.bg,
+              border: `1px solid ${C.border}`,
+              borderRadius: 10,
+              padding: "10px 8px",
+              color: C.textSec,
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Barlow Condensed',sans-serif",
+              cursor: "pointer",
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            ⬆️ Importar backup
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -21,8 +21,9 @@ export const C = {
   missText: "#2d5c3e",
 };
 
-export const stState = (status) => ({
-  0: { bg: C.miss, border: C.missBorder, text: C.missText, icon: "—" },
-  1: { bg: C.have, border: C.haveBorder, text: C.haveText, icon: "✓" },
-  2: { bg: C.dup, border: C.dupBorder, text: C.dupText, icon: "↺" },
-}[status]);
+export const stState = (status) => {
+  if (!status || status <= 0) return { bg: C.miss, border: C.missBorder, text: C.missText, icon: "—" };
+  if (status === 1) return { bg: C.have, border: C.haveBorder, text: C.haveText, icon: "✓" };
+  const dups = status - 1;
+  return { bg: C.dup, border: C.dupBorder, text: C.dupText, icon: dups > 1 ? `↺${dups}` : "↺" };
+};
