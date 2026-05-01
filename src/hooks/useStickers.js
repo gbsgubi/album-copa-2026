@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-const STORAGE_KEY = "wc2026_album_v2";
+const STORAGE_KEY = "wc2026_album_v3";
 
 export function useStickers() {
   const [stickers, setStickers] = useState({});

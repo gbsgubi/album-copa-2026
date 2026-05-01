@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { C } from "../theme.js";
-import { ABERTURA, CONFS, TEAMS, TOTAL, teamStickers } from "../data/teams.js";
+import { GROUPS, ALL_IDS, TOTAL } from "../data/teams.js";
 import ProgressBar from "../components/ProgressBar.jsx";
 
 function StatPill({ val, label, color }) {
@@ -42,41 +42,37 @@ function StatPill({ val, label, color }) {
 }
 
 export default function Home({ stickers, onNav }) {
-  const confStats = useMemo(
+  const groupStats = useMemo(
     () =>
-      CONFS.map((c) => {
-        const teams = TEAMS.filter((t) => t.c === c.id);
-        const total = teams.length * 20;
+      GROUPS.map((g) => {
+        const ids = g.teams.flatMap((t) => t.stickers.map((s) => s.id));
         let have = 0;
-        teams.forEach((t) =>
-          teamStickers(t).forEach((s) => {
-            if ((stickers[s.id] || 0) >= 1) have++;
-          })
-        );
-        return { ...c, have, total, pct: Math.round((have / total) * 100) };
+        ids.forEach((id) => { if ((stickers[id] || 0) >= 1) have++; });
+        const total = ids.length;
+        return { ...g, have, total, pct: Math.round((have / total) * 100) };
       }),
     [stickers]
   );
 
   const totHave = useMemo(() => {
     let n = 0;
-    [
-      ...ABERTURA.map((s) => s.id),
-      ...TEAMS.flatMap((t) => teamStickers(t).map((s) => s.id)),
-    ].forEach((k) => {
-      if ((stickers[k] || 0) >= 1) n++;
-    });
+    ALL_IDS.forEach((id) => { if ((stickers[id] || 0) >= 1) n++; });
     return n;
   }, [stickers]);
+
+  const dups = useMemo(
+    () => Object.values(stickers).filter((v) => v === 2).length,
+    [stickers]
+  );
 
   const pct = Math.round((totHave / TOTAL) * 100);
 
   return (
     <div style={{ padding: "0 16px 24px" }}>
+      {/* Hero */}
       <div
         style={{
-          background:
-            "linear-gradient(135deg,#0e2813 0%,#1a4a2a 50%,#0e2813 100%)",
+          background: "linear-gradient(135deg,#0e2813 0%,#1a4a2a 50%,#0e2813 100%)",
           borderRadius: 20,
           padding: "24px 20px 20px",
           marginBottom: 20,
@@ -105,7 +101,7 @@ export default function Home({ stickers, onNav }) {
             textTransform: "uppercase",
           }}
         >
-          Álbum Panini · 980 figurinhas
+          Álbum Panini · {TOTAL} figurinhas
         </p>
         <ProgressBar pct={pct} color={pct === 100 ? C.gold : C.accent} height={10} />
         <p style={{ fontSize: 13, color: C.textSec, marginTop: 8 }}>
@@ -113,96 +109,88 @@ export default function Home({ stickers, onNav }) {
         </p>
       </div>
 
+      {/* Stats */}
       <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-        <StatPill val={totHave} label="Tenho" color={C.haveText} />
-        <StatPill val={TOTAL - totHave} label="Faltam" color={C.gold} />
-        <StatPill
-          val={Object.values(stickers).filter((v) => v === 2).length}
-          label="Repetidas"
-          color={C.blue}
-        />
+        <StatPill val={totHave}        label="Tenho"     color={C.haveText} />
+        <StatPill val={TOTAL - totHave} label="Faltam"   color={C.gold} />
+        <StatPill val={dups}           label="Repetidas" color={C.blue} />
       </div>
 
-      <div style={{ marginBottom: 6 }}>
-        <h2
-          style={{
-            fontFamily: "'Bebas Neue',cursive",
-            fontSize: 18,
-            color: C.gold,
-            margin: "0 0 12px",
-            letterSpacing: 1,
-          }}
-        >
-          POR CONFEDERAÇÃO
-        </h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {confStats.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => onNav("album", c.id)}
+      {/* Group cards */}
+      <h2
+        style={{
+          fontFamily: "'Bebas Neue',cursive",
+          fontSize: 18,
+          color: C.gold,
+          margin: "0 0 12px",
+          letterSpacing: 1,
+        }}
+      >
+        POR GRUPO
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {groupStats.map((g) => (
+          <button
+            key={g.id}
+            onClick={() => onNav("album", g.id)}
+            style={{
+              background: C.surface,
+              border: `1px solid ${C.border}`,
+              borderRadius: 14,
+              padding: "12px 16px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              textAlign: "left",
+              color: C.textPrimary,
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            <div
               style={{
-                background: C.surface,
-                border: `1px solid ${C.border}`,
-                borderRadius: 14,
-                padding: "12px 16px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                textAlign: "left",
-                color: C.textPrimary,
-                touchAction: "manipulation",
-                WebkitTapHighlightColor: "transparent",
+                fontFamily: "'Bebas Neue',cursive",
+                fontSize: 22,
+                color: C.gold,
+                minWidth: 22,
               }}
             >
-              <span style={{ fontSize: 24 }}>{c.icon}</span>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    fontFamily: "'Barlow Condensed',sans-serif",
-                    marginBottom: 6,
-                  }}
-                >
-                  {c.label}
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: C.textMuted,
-                      marginLeft: 8,
-                    }}
-                  >
-                    {TEAMS.filter((t) => t.c === c.id).length} seleções
-                  </span>
-                </div>
-                <ProgressBar
-                  pct={c.pct}
-                  color={c.pct === 100 ? C.gold : C.accent}
-                  height={4}
-                />
+              {g.id}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", gap: 3, marginBottom: 6 }}>
+                {g.teams.map((t) => (
+                  <span key={t.abv} style={{ fontSize: 20 }}>{t.flag}</span>
+                ))}
               </div>
-              <div style={{ textAlign: "right", minWidth: 40 }}>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: c.pct === 100 ? C.gold : C.haveText,
-                    fontFamily: "'Bebas Neue',cursive",
-                  }}
-                >
-                  {c.pct}%
-                </div>
-                <div style={{ fontSize: 10, color: C.textMuted }}>
-                  {c.have}/{c.total}
-                </div>
+              <ProgressBar
+                pct={g.pct}
+                color={g.pct === 100 ? C.gold : C.accent}
+                height={4}
+              />
+            </div>
+            <div style={{ textAlign: "right", minWidth: 44 }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: "'Bebas Neue',cursive",
+                  color: g.pct === 100 ? C.gold : C.haveText,
+                }}
+              >
+                {g.pct}%
               </div>
-              <span style={{ fontSize: 14, color: C.textMuted }}>›</span>
-            </button>
-          ))}
-        </div>
+              <div style={{ fontSize: 10, color: C.textMuted }}>
+                {g.have}/{g.total}
+              </div>
+            </div>
+            <span style={{ fontSize: 14, color: C.textMuted }}>›</span>
+          </button>
+        ))}
       </div>
 
+      {/* Legend */}
       <div
         style={{
           marginTop: 20,

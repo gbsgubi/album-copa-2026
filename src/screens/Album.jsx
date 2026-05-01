@@ -1,21 +1,22 @@
 import { useCallback, useState } from "react";
 import { C } from "../theme.js";
-import { CONFS, TEAMS, teamStickers } from "../data/teams.js";
+import { GROUPS } from "../data/teams.js";
 import ProgressBar from "../components/ProgressBar.jsx";
 import Chip from "../components/Chip.jsx";
 
-export default function Album({ stickers, onToggle, initConf }) {
-  const [conf, setConf] = useState(initConf || "CONMEBOL");
+const GROUP_IDS = "ABCDEFGHIJKL".split("");
+
+export default function Album({ stickers, onToggle, initGroup }) {
+  const [groupId, setGroupId] = useState(initGroup || "A");
   const [openTeam, setOpen] = useState(null);
 
-  const teams = TEAMS.filter((t) => t.c === conf);
+  const group = GROUPS.find((g) => g.id === groupId);
 
   const teamProgress = useCallback(
     (t) => {
-      const list = teamStickers(t);
       let have = 0;
       let dup = 0;
-      list.forEach((s) => {
+      t.stickers.forEach((s) => {
         const v = stickers[s.id] || 0;
         if (v >= 1) have++;
         if (v === 2) dup++;
@@ -27,61 +28,52 @@ export default function Album({ stickers, onToggle, initConf }) {
 
   return (
     <div style={{ padding: "0 0 16px" }}>
+      {/* Group tabs */}
       <div
         style={{
           overflowX: "auto",
           display: "flex",
-          gap: 6,
-          padding: "12px 16px",
+          gap: 4,
+          padding: "10px 16px",
           scrollbarWidth: "none",
           background: C.surface,
           borderBottom: `1px solid ${C.border}`,
         }}
       >
-        {CONFS.map((c) => (
+        {GROUP_IDS.map((id) => (
           <button
-            key={c.id}
-            onClick={() => {
-              setConf(c.id);
-              setOpen(null);
-            }}
+            key={id}
+            onClick={() => { setGroupId(id); setOpen(null); }}
             style={{
-              padding: "8px 16px",
+              width: 36,
+              height: 36,
               borderRadius: 99,
               border: "none",
               cursor: "pointer",
-              whiteSpace: "nowrap",
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: 700,
-              fontFamily: "'Barlow Condensed',sans-serif",
-              letterSpacing: 0.5,
-              background: conf === c.id ? C.accent : C.bg,
-              color: conf === c.id ? "#fff" : C.textMuted,
+              fontFamily: "'Bebas Neue',cursive",
+              flexShrink: 0,
+              background: groupId === id ? C.accent : C.bg,
+              color: groupId === id ? "#fff" : C.textMuted,
               touchAction: "manipulation",
               WebkitTapHighlightColor: "transparent",
             }}
           >
-            {c.icon} {c.label}
+            {id}
           </button>
         ))}
       </div>
 
-      <div
-        style={{
-          padding: "12px 16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-        }}
-      >
-        {teams.map((team) => {
+      {/* Team list */}
+      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+        {group?.teams.map((team) => {
           const prog = teamProgress(team);
-          const isOpen = openTeam === team.id;
-          const list = teamStickers(team);
+          const isOpen = openTeam === team.abv;
 
           return (
             <div
-              key={team.id}
+              key={team.abv}
               style={{
                 background: C.surface,
                 borderRadius: 16,
@@ -90,7 +82,7 @@ export default function Album({ stickers, onToggle, initConf }) {
               }}
             >
               <button
-                onClick={() => setOpen(isOpen ? null : team.id)}
+                onClick={() => setOpen(isOpen ? null : team.abv)}
                 style={{
                   width: "100%",
                   background: "none",
@@ -105,21 +97,35 @@ export default function Album({ stickers, onToggle, initConf }) {
                   WebkitTapHighlightColor: "transparent",
                 }}
               >
-                <span style={{ fontSize: 36, lineHeight: 1 }}>{team.f}</span>
+                <span style={{ fontSize: 34, lineHeight: 1 }}>{team.flag}</span>
                 <div style={{ flex: 1, textAlign: "left" }}>
                   <div
                     style={{
                       fontSize: 16,
                       fontWeight: 700,
                       fontFamily: "'Barlow Condensed',sans-serif",
+                      display: "flex",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 6,
                     }}
                   >
-                    {team.n}
+                    {team.name}
                     {prog.full && (
+                      <span style={{ fontSize: 11, color: C.gold }}>✦ COMPLETO</span>
+                    )}
+                    {team.warn && (
                       <span
-                        style={{ marginLeft: 8, fontSize: 11, color: C.gold }}
+                        style={{
+                          fontSize: 10,
+                          color: C.gold,
+                          background: "#2a1a00",
+                          borderRadius: 4,
+                          padding: "1px 5px",
+                          border: `1px solid ${C.gold}44`,
+                        }}
                       >
-                        ✦ COMPLETO
+                        Dados a confirmar
                       </span>
                     )}
                   </div>
@@ -142,11 +148,11 @@ export default function Album({ stickers, onToggle, initConf }) {
                       style={{
                         fontSize: 11,
                         color: prog.full ? C.gold : C.textSec,
-                        minWidth: 44,
+                        minWidth: 52,
                         textAlign: "right",
                       }}
                     >
-                      {prog.have}/20{prog.dup > 0 ? ` ·${prog.dup}↺` : ""}
+                      {prog.have}/20{prog.dup > 0 ? ` · ${prog.dup}↺` : ""}
                     </span>
                   </div>
                 </div>
@@ -170,15 +176,17 @@ export default function Album({ stickers, onToggle, initConf }) {
                       borderRadius: 10,
                       padding: 10,
                       display: "grid",
-                      gridTemplateColumns: "repeat(5,1fr)",
+                      gridTemplateColumns: "repeat(4,1fr)",
                       gap: 6,
                     }}
                   >
-                    {list.map((s) => (
+                    {team.stickers.map((s) => (
                       <Chip
                         key={s.id}
                         id={s.id}
-                        num={s.num}
+                        code={s.code}
+                        label={s.label}
+                        foil={s.foil}
                         status={stickers[s.id] || 0}
                         onTap={onToggle}
                       />

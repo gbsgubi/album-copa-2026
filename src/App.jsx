@@ -3,18 +3,18 @@ import { C } from "./theme.js";
 import { useStickers } from "./hooks/useStickers.js";
 import Home from "./screens/Home.jsx";
 import Album from "./screens/Album.jsx";
-import Abertura from "./screens/Abertura.jsx";
+import Especiais from "./screens/Abertura.jsx";
 import Trocas from "./screens/Trocas.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 
 export default function App() {
   const { stickers, toggle, loaded } = useStickers();
   const [screen, setScreen] = useState("home");
-  const [albumConf, setAlbumConf] = useState("CONMEBOL");
+  const [albumGroup, setAlbumGroup] = useState("A");
 
-  const navTo = (s, conf) => {
+  const navTo = (s, group) => {
     setScreen(s);
-    if (conf) setAlbumConf(conf);
+    if (group) setAlbumGroup(group);
   };
 
   if (!loaded) {
@@ -91,10 +91,10 @@ export default function App() {
       <div style={{ flex: 1, overflowY: "auto", paddingTop: 14 }}>
         {screen === "home" && <Home stickers={stickers} onNav={navTo} />}
         {screen === "album" && (
-          <Album stickers={stickers} onToggle={toggle} initConf={albumConf} />
+          <Album stickers={stickers} onToggle={toggle} initGroup={albumGroup} />
         )}
-        {screen === "abertura" && (
-          <Abertura stickers={stickers} onToggle={toggle} />
+        {screen === "especiais" && (
+          <Especiais stickers={stickers} onToggle={toggle} />
         )}
         {screen === "trocas" && <Trocas stickers={stickers} />}
       </div>

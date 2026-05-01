@@ -1,19 +1,17 @@
 import { useMemo } from "react";
 import { C } from "../theme.js";
-import { ABERTURA, TEAMS, teamStickers } from "../data/teams.js";
+import { FWC_ABERTURA, FWC_MUSEU, CC_SERIES, GROUPS } from "../data/teams.js";
 
 export default function Trocas({ stickers }) {
   const list = useMemo(() => {
     const all = [
-      ...ABERTURA.map((s) => ({
-        id: s.id,
-        num: s.num,
-        label: s.label,
-        teamName: "Abertura",
-        flag: "📖",
-      })),
-      ...TEAMS.flatMap((t) =>
-        teamStickers(t).map((s) => ({ ...s, teamName: t.n, flag: t.f }))
+      ...FWC_ABERTURA.map((s) => ({ id: s.id, code: s.code, label: s.label, teamName: "FWC Abertura",   flag: "⭐" })),
+      ...FWC_MUSEU.map((s)    => ({ id: s.id, code: s.code, label: s.label, teamName: "FWC Museu Copa", flag: "🏛️" })),
+      ...CC_SERIES.map((s)    => ({ id: s.id, code: s.code, label: s.label, teamName: "Coca-Cola",       flag: "🥤" })),
+      ...GROUPS.flatMap((g) =>
+        g.teams.flatMap((t) =>
+          t.stickers.map((s) => ({ id: s.id, code: s.code, label: s.label, teamName: t.name, flag: t.flag }))
+        )
       ),
     ];
     return all.filter((s) => (stickers[s.id] || 0) === 2);
@@ -21,13 +19,7 @@ export default function Trocas({ stickers }) {
 
   if (list.length === 0)
     return (
-      <div
-        style={{
-          padding: "60px 24px",
-          textAlign: "center",
-          color: C.textMuted,
-        }}
-      >
+      <div style={{ padding: "60px 24px", textAlign: "center", color: C.textMuted }}>
         <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
         <p
           style={{
@@ -40,8 +32,7 @@ export default function Trocas({ stickers }) {
           Nenhuma repetida ainda!
         </p>
         <p style={{ fontSize: 13, lineHeight: 1.6 }}>
-          Quando você marcar uma figurinha como ↺, ela aparecerá aqui para
-          facilitar a troca.
+          Quando você marcar uma figurinha como ↺, ela aparecerá aqui para facilitar a troca.
         </p>
       </div>
     );
@@ -95,7 +86,7 @@ export default function Trocas({ stickers }) {
               gap: 12,
             }}
           >
-            <span style={{ fontSize: 32, lineHeight: 1 }}>{s.flag}</span>
+            <span style={{ fontSize: 28, lineHeight: 1 }}>{s.flag}</span>
             <div style={{ flex: 1 }}>
               <div
                 style={{
@@ -108,7 +99,7 @@ export default function Trocas({ stickers }) {
                 {s.teamName}
               </div>
               <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>
-                Nº {s.num} · {s.label}
+                {s.code} · {s.label}
               </div>
             </div>
             <span style={{ fontSize: 20, color: C.dupText }}>↺</span>
